@@ -1,8 +1,19 @@
-# Inference + serve (Docker)
+# Data & pipeline
 pandas>=1.5
 pyarrow>=12
+numpy>=1.22
+
+# Training & models
 scikit-learn>=1.2
 joblib>=1.2
-numpy>=1.22
-flask>=2.3
-gunicorn>=21
+xgboost>=1.7
+catboost>=1.2
+lightgbm>=4.0
+
+# EDA
+matplotlib>=3.5
+seaborn>=0.12
+
+# LLM enrichment (optional)
+python-dotenv>=1.0
+google-generativeai>=0.3
