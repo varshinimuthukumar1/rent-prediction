@@ -1,5 +1,8 @@
 # Rent Prediction
 
+> [!NOTE]
+> The deliverables are present in `notebook/rent_prediction_presentation.ipynb`.
+
 Predict apartment **total rent** from German listing data using tabular features and optional LLM-derived signals. The pipeline cleans and featurizes ImmoScout-style data, optionally enriches descriptions with Gemini, and trains regression models (CatBoost, XGBoost, LightGBM, Random Forest).
 
 ---
