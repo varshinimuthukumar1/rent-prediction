@@ -22,7 +22,6 @@ DEFAULT_MODEL_PATH = Path("models/rent_price_model.joblib")
 SELECTED_FEATURE_COLS = [
     "livingSpace",
     "noRooms",
-    "yearConstructed",
     "yearConstructedRange",
     "lastRefurbish",
     "floor",
@@ -35,8 +34,38 @@ SELECTED_FEATURE_COLS = [
     "avg_rent_per_sqm_plz",
     "avg_total_rent_regio3",
     "avg_total_rent_regio2",
+    "garden",
+    "typeOfFlat",
+    "condition",
+    "interiorQual",
+    "cellar",
+    "hasKitchen",
+    "lift",
+    "firingTypes",
+    "noParkSpaces",
+    "newlyConst",
+    "telecomTvOffer",
+    "heatingType",
+    "picturecount",
+    "heatingCosts",
+    "electricityKwhPrice",
+    "telekomTvOffer",
+    "balcony",
 ]
 
+TEXT_DERIVED_FEATURE_COLS = [
+    "floor_heating",        
+    "guest_toilet",        
+    "built_in_kitchen",        
+    "garage_available",              
+    "dishwasher",                 
+    "bathtub",         
+    "parquet_floor",           
+    "luxury_score",
+    "green_view",
+    "quiet_neighborhood",
+    "near_public_transport"
+]
 
 def get_feature_target(
     df: pd.DataFrame,
@@ -220,16 +249,24 @@ def train_rent_model(
     pipeline = build_preprocessing_and_model(X_train, estimator=estimator)
     pipeline.fit(X_train, y_train)
 
-    # Evaluate
+    # Evaluate in log-space and euro-space
     y_pred = pipeline.predict(X_test)
     mse = mean_squared_error(y_test, y_pred)
     rmse = mse**0.5
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
 
-    print(f"Test RMSE: {rmse:,.2f}")
-    print(f"Test MAE : {mae:,.2f}")
-    print(f"Test R^2 : {r2:,.3f}")
+    # Euro-scale metrics (antilog of totalRent)
+    y_test_eur = np.exp(y_test)
+    y_pred_eur = np.exp(y_pred)
+    rmse_eur = mean_squared_error(y_test_eur, y_pred_eur) ** 0.5
+    mae_eur = mean_absolute_error(y_test_eur, y_pred_eur)
+
+    print(f"Test RMSE (log-space): {rmse:,.2f}")
+    print(f"Test MAE  (log-space): {mae:,.2f}")
+    print(f"Test R^2             : {r2:,.3f}")
+    print(f"Test RMSE (euros)    : {rmse_eur:,.0f} €")
+    print(f"Test MAE  (euros)    : {mae_eur:,.0f} €")
 
     # Save model
     if model_out is None:

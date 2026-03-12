@@ -72,36 +72,43 @@ def main():
             continue
         pipeline = build_preprocessing_and_model(X_train, estimator=est)
         pipeline.fit(X_train, y_train)
-        y_pred = pipeline.predict(X_test)
-        rmse = mean_squared_error(y_test, y_pred) ** 0.5
-        mae = mean_absolute_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
+        y_pred_train = pipeline.predict(X_train)
+        y_pred_test = pipeline.predict(X_test)
+        rmse_train = mean_squared_error(y_train, y_pred_train) ** 0.5
+        mae_train = mean_absolute_error(y_train, y_pred_train)
+        r2_train = r2_score(y_train, y_pred_train)
+        rmse_test = mean_squared_error(y_test, y_pred_test) ** 0.5
+        mae_test = mean_absolute_error(y_test, y_pred_test)
+        r2_test = r2_score(y_test, y_pred_test)
         results.append(
             {
                 "run_name": run_name,
                 "model": model_name,
                 "params": str(model_params),
-                "rmse": round(rmse, 2),
-                "mae": round(mae, 2),
-                "r2": round(r2, 4),
+                "train_rmse": round(rmse_train, 2),
+                "train_mae": round(mae_train, 2),
+                "train_r2": round(r2_train, 4),
+                "test_rmse": round(rmse_test, 2),
+                "test_mae": round(mae_test, 2),
+                "test_r2": round(r2_test, 4),
             }
         )
         # Save this run's model
         out_dir = Path("models")
         out_dir.mkdir(parents=True, exist_ok=True)
         joblib.dump(pipeline, out_dir / f"rent_price_model_{run_name}.joblib")
-        print(f"  {run_name}: RMSE={rmse:.2f}, MAE={mae:.2f}, R²={r2:.4f}")
+        print(f"  {run_name}: train RMSE={rmse_train:.2f} MAE={mae_train:.2f} R²={r2_train:.4f}  |  test RMSE={rmse_test:.2f} MAE={mae_test:.2f} R²={r2_test:.4f}")
 
     if not results:
         print("No runs completed.")
         return
 
     summary = pd.DataFrame(results)
-    summary = summary.sort_values("rmse").reset_index(drop=True)
+    summary = summary.sort_values("test_rmse").reset_index(drop=True)
     out_path = Path("reports/training_results.csv")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     summary.to_csv(out_path, index=False)
-    print("\nSummary (sorted by RMSE):")
+    print("\nSummary (sorted by test RMSE):")
     print(summary.to_string(index=False))
     print(f"\nResults saved to {out_path.resolve()}")
 

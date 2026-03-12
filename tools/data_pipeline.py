@@ -11,11 +11,11 @@ import seaborn as sns
 
 
 RAW_DIR = Path("data/apartment-rental-offers-in-germany")
-RAW_PARQUET = RAW_DIR / "immo_data.parquet"
+RAW_PARQUET = Path("data/processed/immo_merged_with_llm_features.parquet")
 RAW_CSV = RAW_DIR / "immo_data.csv"
 
 PROCESSED_DIR = Path("data/processed")
-PROCESSED_DATASET = PROCESSED_DIR / "immo_clean.parquet"
+PROCESSED_DATASET = Path("data/processed/immo_merged_with_llm_features_cleaned.parquet")
 
 REPORTS_DIR = Path("reports/eda")
 
@@ -70,18 +70,26 @@ def clean_immo_data(df: pd.DataFrame) -> pd.DataFrame:
     if "date" in df.columns:
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
 
-    # Convert TRUE/FALSE strings to booleans where appropriate
-    bool_candidates = ["newlyConst", "balcony", "hasKitchen", "cellar", "lift", "garden"]
+    # Convert TRUE/FALSE (or True/False) strings, or already-boolean, to booleans where appropriate
+    # (luxury_score is ordinal 1–10 from LLM, so not in this list)
+    # Parquet can load as Python bool; CSV/LLM often give "True"/"False" or "TRUE"/"FALSE"
+    bool_candidates = ["newlyConst", "balcony", "hasKitchen", "cellar", "lift", "garden", "floor_heating", "guest_toilet", "built_in_kitchen", "garage_available", "dishwasher", "bathtub", "parquet_floor","green_view", "quiet_neighborhood", "near_public_transport"]
+    bool_map = {True: True, False: False, "TRUE": True, "FALSE": False, "True": True, "False": False}
     for col in bool_candidates:
         if col in df.columns:
             df[col] = (
                 df[col]
-                .map({"TRUE": True, "FALSE": False})
+                .map(bool_map)
                 .astype("boolean")
             )
+            # Treat missing / empty as False (e.g. "not mentioned" = not present)
+            df[col] = df[col].fillna(False)
 
-    # Ensure numeric types for key numeric features
-    numeric_cols = ["serviceCharge", "totalRent", "baseRent", "livingSpace", "noRooms"]
+    # Ensure numeric types for key numeric features (including ordinal 1–10 style columns)
+    numeric_cols = [
+        "serviceCharge", "totalRent", "baseRent", "livingSpace", "noRooms",
+        "luxury_score",  # LLM ordinal 1–10; keep numeric for modelling
+    ]
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
