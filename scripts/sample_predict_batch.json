@@ -1,0 +1,30 @@
+[
+  {
+    "livingSpace": 65,
+    "noRooms": 3,
+    "serviceCharge": 120,
+    "avg_rent_per_sqm_plz": 12.5,
+    "avg_total_rent_regio3": 7.0,
+    "avg_total_rent_regio2": 6.9,
+    "floor": 2,
+    "numberOfFloors": 5,
+    "yearConstructedRange": 2,
+    "typeOfFlat": "apartment",
+    "condition": "well_kept",
+    "heatingType": "central_heating"
+  },
+  {
+    "livingSpace": 45,
+    "noRooms": 2,
+    "serviceCharge": 80,
+    "avg_rent_per_sqm_plz": 11.0,
+    "avg_total_rent_regio3": 6.5,
+    "avg_total_rent_regio2": 6.4,
+    "floor": 1,
+    "numberOfFloors": 4,
+    "yearConstructedRange": 3,
+    "typeOfFlat": "apartment",
+    "condition": "first_time_use",
+    "heatingType": "self_contained_central_heating"
+  }
+]
